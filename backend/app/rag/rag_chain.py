@@ -1,5 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
+
 RAG_PROMPT = ChatPromptTemplate.from_template("""
 Ты — официальный AI-агент клиентской поддержки банка по кредитам.
 Работай строго в рамках предоставленной базы знаний (контекст RAG).
@@ -49,13 +50,23 @@ RAG_PROMPT = ChatPromptTemplate.from_template("""
 — Без нумерованных списков, если это не требуется для понимания.
 — В конце укажи источник информации:
   «Источник: <название документа>».
+""")
 
-КОНТЕКСТ:
+def run_rag(llm, vectorstore, question: str):
+    docs = vectorstore.similarity_search(question, k=4)
+
+    context = "\n\n".join(d.page_content for d in docs)
+
+    prompt = f"""{RAG_PROMPT} 
+
+Ответь на вопрос, используя контекст ниже.
+   
+Контекст:
 {context}
 
-ВОПРОС КЛИЕНТА:
-{input}
+Вопрос:
+{question}
+"""
 
-ОТВЕТ:
-
-""")
+    response = llm.invoke(prompt)
+    return response.content
