@@ -1,43 +1,47 @@
+from rag.answer import answer
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# Импорт твоей функции для работы с GigaChat
-from giagachat_stuff import sendMessageFromBackend
-
 app = FastAPI(title="СБЕР AI — Backend GigaChat")
 
-# --- CORS ---
+#
+# Политика CORS для нашего бекенда.
+#
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешаем фронту обращаться к API
+    allow_origins=["*"],  # Разрешаем обращаться к нам с любых хостов (плохой вариант, но в нашем случае самый удобный.)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Проверка здоровья сервиса ---
+#
+# Хелс чекер для проверки работоспособности нашего сервера (для инфраструктуры render).
+#
 @app.get("/health")
 def health():
     return {"status": "healthy"}
 
-# --- Модель POST-запроса ---
+#
+# Тело запроса к АПИ.
+#
 class ChatMessage(BaseModel):
     text: str
 
-# --- Эндпоинт для чата ---
+#
+# Эндпоинт запроса ответа на вопрос в чате.
+#
 @app.post("/api/chat")
 async def chat_endpoint(message: ChatMessage):
     try:
-        # Отправляем текст в GigaChat через твою функцию
-        answer = sendMessageFromBackend(message.text)
-        return {"answer": answer, "status": "success"}
+        return {"answer": answer(message.text), "status": "success"}
     except Exception as e:
-        # Если что-то пошло не так
         return {"answer": f"Ошибка: {str(e)}", "status": "error"}
 
 
-# --- Статика фронта ---
+#
+# Статика нашего сервера.
+#
 app.mount("/", StaticFiles(directory="../../frontend/src", html=True), name="static")
-

@@ -1,6 +1,6 @@
 from langchain_community.vectorstores import FAISS
-from app.loaders import load_documents
-from app.embeddings import get_embeddings
+from rag.loaders import load_documents
+from rag.embeddings import get_embeddings
 
 
 def load_vectorstore():
