@@ -44,4 +44,4 @@ async def chat_endpoint(message: ChatMessage):
 #
 # Статика нашего сервера.
 #
-app.mount("/", StaticFiles(directory="../../frontend/src", html=True), name="static")
+app.mount("/", StaticFiles(directory="../../frontend", html=True), name="static")
